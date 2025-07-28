@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的樹系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32',
+                        secondary: '#8D6E63',
+                        neutral: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-neutral min-h-screen font-sans">
+    <!-- 主要内容页面 -->
+    <div id="main-content" class="page-transition fade-in">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl font-bold mb-2 md:mb-0">
+                    <i class="fa fa-tree mr-2"></i>
+                    我的樹系統
+                </h1>
+                
+                <!-- 语言选择器 -->
+                <div class="flex space-x-2">
+                    <button class="language-btn bg-white bg-opacity-20 text-white px-3 py-1 rounded-md hover:bg-opacity-30 transition-smooth" onclick="window.location.href='zh-CN.html'">简中</button>
+                    <button class="language-btn bg-white text-primary px-3 py-1 rounded-md hover:bg-opacity-80 transition-smooth" onclick="window.location.href='zh-TW.html'">繁中</button>
+                    <button class="language-btn bg-white bg-opacity-20 text-white px-3 py-1 rounded-md hover:bg-opacity-30 transition-smooth" onclick="window.location.href='en.html'">Eng</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- 树木照片区域 -->
+                <div class="relative">
+                    <div class="aspect-video bg-gray-200">
+                        <img id="treeImage" src="img/1061753505248_.pic_hd.jpg" alt="樹木照片" class="w-full h-full object-cover image-transition">
+                    </div>
+                    
+                    <!-- 照片切换按钮 -->
+                    <div class="absolute bottom-4 right-4 flex space-x-2">
+                        <button onclick="changeImage('img/1061753505248_.pic_hd.jpg')" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-opacity-100 transition-smooth active">1</button>
+                        <button onclick="changeImage('img/1071753505253_.pic_hd.jpg')" class="w-10 h-10 rounded-full bg-white bg-opacity-70 flex items-center justify-center hover:bg-opacity-100 transition-smooth">2</button>
+                        <button onclick="changeImage('img/1081753505260_.pic_hd.jpg')" class="w-10 h-10 rounded-full bg-white bg-opacity-70 flex items-center justify-center hover:bg-opacity-100 transition-smooth">3</button>
+                    </div>
+                </div>
+
+                <!-- 树木信息 -->
+                <div class="p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-shadow">
+                        樹木資訊
+                    </h2>
+                    
+                    <div class="space-y-4 text-gray-700">
+                        <div class="flex items-start">
+                            <i class="fa fa-calendar text-primary mt-1 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold">
+                                    種植年份:
+                                </p>
+                                <p class="ml-4">2008</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fa fa-map-marker text-primary mt-1 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold">
+                                    所屬地址:
+                                </p>
+                                <p class="ml-4">中華人民共和國廣東省中山市三鄉鎮東城花園E25-102單位</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fa fa-history text-primary mt-1 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold">
+                                    樹齡:
+                                </p>
+                                <p class="ml-4"><span id="treeAge"></span> 年</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 树木简介 -->
+                    <div class="mt-8 p-4 bg-green-50 rounded-lg border border-green-100">
+                        <h3 class="text-xl font-semibold text-primary mb-3">
+                            <i class="fa fa-info-circle mr-2"></i>
+                            簡介
+                        </h3>
+                        <p class="text-gray-700">
+                            這棵樹於2008年種植，見證了多年的風雨變遷。它生長在廣東省中山市三鄉鎮東城花園，
+                            屬於E25-102單位所有。多年來，它為周圍環境增添了綠意與生機，也成為了家庭的一部分記憶。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="bg-gray-800 text-white py-6 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <p>© <span id="currentYear"></span> 我的樹系統 - 保留所有權利</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 预计算树龄
+            calculateTreeAge();
+            
+            // 触发页面淡入动画
+            setTimeout(() => {
+                document.getElementById('main-content').classList.add('fade-in');
+            }, 50);
+        });
+
+        // 计算树龄
+        function calculateTreeAge() {
+            const plantingYear = 2008;
+            const currentYear = new Date().getFullYear();
+            const age = currentYear - plantingYear;
+            
+            document.getElementById('treeAge').textContent = age;
+            document.getElementById('currentYear').textContent = currentYear;
+        }
+        
+        // 切换图片
+        function changeImage(src) {
+            const img = document.getElementById('treeImage');
+            const buttons = document.querySelectorAll('[onclick^="changeImage"]');
+            
+            // 重置所有按钮样式
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-white', 'bg-opacity-70');
+            });
+            
+            // 高亮当前按钮
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(src)) {
+                    btn.classList.remove('bg-white', 'bg-opacity-70');
+                    btn.classList.add('bg-primary', 'text-white');
+                }
+            });
+            
+            // 图片切换动画
+            img.classList.add('opacity-0');
+            setTimeout(() => {
+                img.src = src;
+                img.classList.remove('opacity-0');
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>

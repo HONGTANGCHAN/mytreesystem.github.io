@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tree System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32',
+                        secondary: '#8D6E63',
+                        neutral: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-neutral min-h-screen font-sans">
+    <!-- 主要内容页面 -->
+    <div id="main-content" class="page-transition fade-in">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl font-bold mb-2 md:mb-0">
+                    <i class="fa fa-tree mr-2"></i>
+                    My Tree System
+                </h1>
+                
+                <!-- 语言选择器 -->
+                <div class="flex space-x-2">
+                    <button class="language-btn bg-white bg-opacity-20 text-white px-3 py-1 rounded-md hover:bg-opacity-30 transition-smooth" onclick="window.location.href='zh-CN.html'">简中</button>
+                    <button class="language-btn bg-white bg-opacity-20 text-white px-3 py-1 rounded-md hover:bg-opacity-30 transition-smooth" onclick="window.location.href='zh-TW.html'">繁中</button>
+                    <button class="language-btn bg-white text-primary px-3 py-1 rounded-md hover:bg-opacity-80 transition-smooth" onclick="window.location.href='en.html'">Eng</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- 树木照片区域 -->
+                <div class="relative">
+                    <div class="aspect-video bg-gray-200">
+                        <img id="treeImage" src="img/1061753505248_.pic_hd.jpg" alt="Tree Photo" class="w-full h-full object-cover image-transition">
+                    </div>
+                    
+                    <!-- 照片切换按钮 -->
+                    <div class="absolute bottom-4 right-4 flex space-x-2">
+                        <button onclick="changeImage('img/1061753505248_.pic_hd.jpg')" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-opacity-100 transition-smooth active">1</button>
+                        <button onclick="changeImage('img/1071753505253_.pic_hd.jpg')" class="w-10 h-10 rounded-full bg-white bg-opacity-70 flex items-center justify-center hover:bg-opacity-100 transition-smooth">2</button>
+                        <button onclick="changeImage('img/1081753505260_.pic_hd.jpg')" class="w-10 h-10 rounded-full bg-white bg-opacity-70 flex items-center justify-center hover:bg-opacity-100 transition-smooth">3</button>
+                    </div>
+                </div>
+
+                <!-- 树木信息 -->
+                <div class="p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-shadow">
+                        Tree Information
+                    </h2>
+                    
+                    <div class="space-y-4 text-gray-700">
+                        <div class="flex items-start">
+                            <i class="fa fa-calendar text-primary mt-1 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold">
+                                    Planting Year:
+                                </p>
+                                <p class="ml-4">2008</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fa fa-map-marker text-primary mt-1 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold">
+                                    Location:
+                                </p>
+                                <p class="ml-4">Unit E25-102, Dongcheng Garden, Sanxiang Town, Zhongshan City, Guangdong Province, People's Republic of China</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fa fa-history text-primary mt-1 mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-semibold">
+                                    Age:
+                                </p>
+                                <p class="ml-4"><span id="treeAge"></span> years</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 树木简介 -->
+                    <div class="mt-8 p-4 bg-green-50 rounded-lg border border-green-100">
+                        <h3 class="text-xl font-semibold text-primary mb-3">
+                            <i class="fa fa-info-circle mr-2"></i>
+                            Introduction
+                        </h3>
+                        <p class="text-gray-700">
+                            This tree was planted in 2008 and has witnessed many years of changes. It grows in Dongcheng Garden,
+                            Sanxiang Town, Zhongshan City, Guangdong Province, and belongs to Unit E25-102. Over the years,
+                            it has added greenery and vitality to the surrounding environment and has become part of the family's memories.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="bg-gray-800 text-white py-6 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <p>© <span id="currentYear"></span> My Tree System - All Rights Reserved</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 预计算树龄
+            calculateTreeAge();
+            
+            // 触发页面淡入动画
+            setTimeout(() => {
+                document.getElementById('main-content').classList.add('fade-in');
+            }, 50);
+        });
+
+        // 计算树龄
+        function calculateTreeAge() {
+            const plantingYear = 2008;
+            const currentYear = new Date().getFullYear();
+            const age = currentYear - plantingYear;
+            
+            document.getElementById('treeAge').textContent = age;
+            document.getElementById('currentYear').textContent = currentYear;
+        }
+        
+        // 切换图片
+        function changeImage(src) {
+            const img = document.getElementById('treeImage');
+            const buttons = document.querySelectorAll('[onclick^="changeImage"]');
+            
+            // 重置所有按钮样式
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-white', 'bg-opacity-70');
+            });
+            
+            // 高亮当前按钮
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(src)) {
+                    btn.classList.remove('bg-white', 'bg-opacity-70');
+                    btn.classList.add('bg-primary', 'text-white');
+                }
+            });
+            
+            // 图片切换动画
+            img.classList.add('opacity-0');
+            setTimeout(() => {
+                img.src = src;
+                img.classList.remove('opacity-0');
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>
