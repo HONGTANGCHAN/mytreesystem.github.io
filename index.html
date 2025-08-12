@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的树系统</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32', // 树的绿色作为主色调
+                        secondary: '#8D6E63', // 木材棕色作为辅助色
+                        accent: '#FFB74D', // 强调色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-transform-opacity {
+                transition-property: transform, opacity;
+            }
+        }
+    </style>
+    
+    <style>
+        /* 全局动画定义 */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 轮播图动画 */
+        .carousel-item {
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .carousel-item.active {
+            opacity: 1;
+            display: block;
+        }
+        
+        .carousel-item.inactive {
+            opacity: 0;
+            display: none;
+        }
+        
+        /* 平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* 加载字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800 overflow-x-hidden">
+    <!-- 语言选择页面 -->
+    <div id="language-selection" class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/90 to-primary p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-md w-full transform transition-all duration-500 hover:shadow-primary/20">
+            <div class="text-center mb-8">
+                <i class="fa fa-tree text-6xl text-primary mb-4"></i>
+                <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-gray-800">我的树系统</h1>
+                <p class="text-gray-500 mt-2">Please select your language</p>
+                <p class="text-gray-500">请选择您的语言</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="selectLanguage('zh-CN')" class="w-full py-4 px-6 bg-primary text-white rounded-xl text-lg font-medium transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-1">
+                    简体中文
+                </button>
+                <button onclick="selectLanguage('zh-TW')" class="w-full py-4 px-6 bg-gray-100 text-gray-800 rounded-xl text-lg font-medium transition-all duration-300 hover:bg-gray-200 hover:shadow-lg transform hover:-translate-y-1">
+                    繁體中文
+                </button>
+                <button onclick="selectLanguage('en')" class="w-full py-4 px-6 bg-gray-100 text-gray-800 rounded-xl text-lg font-medium transition-all duration-300 hover:bg-gray-200 hover:shadow-lg transform hover:-translate-y-1">
+                    English
+                </button>
+            </div>
+            
+            <div class="mt-10 text-center text-gray-500 text-sm">
+                <p>© 2025 我的树系统</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容页面 (默认隐藏) -->
+    <div id="main-content" class="hidden">
+        <!-- 导航栏 -->
+        <header class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm shadow-sm z-50 transition-all duration-300">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fa fa-tree text-primary text-2xl mr-2"></i>
+                    <h1 class="text-xl font-bold text-gray-800" data-i18n="title">我的树系统</h1>
+                </div>
+                
+                <!-- 语言切换器 -->
+                <div class="flex space-x-2">
+                    <button onclick="changeLanguage('zh-CN')" class="language-btn px-3 py-1 rounded-full text-sm font-medium bg-primary text-white">简</button>
+                    <button onclick="changeLanguage('zh-TW')" class="language-btn px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">繁</button>
+                    <button onclick="changeLanguage('en')" class="language-btn px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200">En</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="pt-16">
+            <!-- 图片轮播 -->
+            <section class="relative h-[50vh] md:h-[70vh] overflow-hidden">
+                <div id="carousel" class="w-full h-full">
+                    <!-- 轮播图片1 -->
+                    <div class="carousel-item active absolute inset-0 w-full h-full">
+                        <img src="https://i.ibb.co/BVcFZW5k/1081753505260-pic-hd.jpg" alt="树木的照片1" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                            <div class="p-6 md:p-10 text-white">
+                                <h2 class="text-2xl md:text-4xl font-bold text-shadow" data-i18n="carousel1-title">成长的见证</h2>
+                                <p class="mt-2 text-shadow max-w-2xl" data-i18n="carousel1-desc">这棵树见证了岁月的变迁，从幼苗成长为参天大树</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 轮播图片2 -->
+                    <div class="carousel-item inactive absolute inset-0 w-full h-full">
+                        <img src="https://i.ibb.co/0Rcv6Ghf/1061753505248-pic-hd.jpg" alt="树木的照片2" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                            <div class="p-6 md:p-10 text-white">
+                                <h2 class="text-2xl md:text-4xl font-bold text-shadow" data-i18n="carousel2-title">四季的变化</h2>
+                                <p class="mt-2 text-shadow max-w-2xl" data-i18n="carousel2-desc">经历了春的萌芽、夏的繁茂、秋的落叶和冬的寂静</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 轮播图片3 -->
+                    <div class="carousel-item inactive absolute inset-0 w-full h-full">
+                        <img src="https://i.ibb.co/1tWKgLVJ/1071753505253-pic-hd.jpg" alt="树木的照片3" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                            <div class="p-6 md:p-10 text-white">
+                                <h2 class="text-2xl md:text-4xl font-bold text-shadow" data-i18n="carousel3-title">自然的馈赠</h2>
+                                <p class="mt-2 text-shadow max-w-2xl" data-i18n="carousel3-desc">为周围的环境带来生机与活力，是大自然的宝贵财富</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 轮播控制按钮 -->
+                <button id="prev-btn" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white/50 transition-all">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <button id="next-btn" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white/50 transition-all">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+                
+                <!-- 轮播指示器 -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                    <button class="carousel-indicator w-3 h-3 rounded-full bg-white opacity-100" data-index="0"></button>
+                    <button class="carousel-indicator w-3 h-3 rounded-full bg-white opacity-50" data-index="1"></button>
+                    <button class="carousel-indicator w-3 h-3 rounded-full bg-white opacity-50" data-index="2"></button>
+                </div>
+            </section>
+            
+            <!-- 树木信息 -->
+            <section class="py-12 md:py-20 bg-white">
+                <div class="container mx-auto px-4">
+                    <div class="max-w-3xl mx-auto">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4 slide-up" style="animation-delay: 0.1s" data-i18n="about-title">关于这棵树</h2>
+                            <div class="w-20 h-1 bg-primary mx-auto slide-up" style="animation-delay: 0.2s"></div>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-2xl shadow-sm p-6 md:p-8 slide-up" style="animation-delay: 0.3s">
+                            <div class="flex items-start mb-6">
+                                <div class="bg-primary/10 p-3 rounded-full mr-4">
+                                    <i class="fa fa-calendar text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2" data-i18n="planted-date-title">种植日期</h3>
+                                    <p class="text-gray-600" data-i18n="planted-date">2008年</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start mb-6">
+                                <div class="bg-primary/10 p-3 rounded-full mr-4">
+                                    <i class="fa fa-map-marker text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2" data-i18n="location-title">位置信息</h3>
+                                    <p class="text-gray-600" data-i18n="location">中华人民共和国广东省中山市三乡镇东城花园E25-102单位</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-primary/10 p-3 rounded-full mr-4">
+                                    <i class="fa fa-info-circle text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2" data-i18n="description-title">树木描述</h3>
+                                    <p class="text-gray-600" data-i18n="description">这棵树自2008年种植以来，已经陪伴我们度过了17个春秋。它不仅美化了环境，还为我们提供了阴凉和新鲜空气。多年来，它见证了周围的变化，也成为了我们生活中不可或缺的一部分。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 树木成长时间线 -->
+            <section class="py-12 md:py-20 bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4" data-i18n="timeline-title">成长历程</h2>
+                        <div class="w-20 h-1 bg-primary mx-auto"></div>
+                    </div>
+                    
+                    <div class="max-w-4xl mx-auto">
+                        <div class="relative">
+                            <!-- 时间线中轴线 -->
+                            <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-primary/30 transform -translate-x-1/2"></div>
+                            
+                            <!-- 时间点1 -->
+                            <div class="relative mb-16">
+                                <div class="absolute left-1/2 top-0 w-6 h-6 rounded-full bg-primary transform -translate-x-1/2 z-10"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                    <div class="md:text-right order-2 md:order-1">
+                                        <h3 class="text-xl font-bold text-gray-800 mb-2">2008年</h3>
+                                        <p class="text-gray-600" data-i18n="timeline-2008">小树苗被精心种植，开始了它的生长旅程</p>
+                                    </div>
+                                    <div class="order-1 md:order-2"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- 时间点2 -->
+                            <div class="relative mb-16">
+                                <div class="absolute left-1/2 top-0 w-6 h-6 rounded-full bg-primary transform -translate-x-1/2 z-10"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                    <div class="hidden md:block"></div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800 mb-2">2016年</h3>
+                                        <p class="text-gray-600" data-i18n="timeline-2016">树苗茁壮成长，枝繁叶茂，已经长到了可观的高度</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 时间点3 -->
+                            <div class="relative">
+                                <div class="absolute left-1/2 top-0 w-6 h-6 rounded-full bg-primary transform -translate-x-1/2 z-10"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                    <div class="md:text-right order-2 md:order-1">
+                                        <h3 class="text-xl font-bold text-gray-800 mb-2">2025年</h3>
+                                        <p class="text-gray-600" data-i18n="timeline-2025">成为了一棵参天大树，为周围环境带来生机与活力，已生长17年</p>
+                                    </div>
+                                    <div class="order-1 md:order-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="bg-gray-800 text-white py-8">
+            <div class="container mx-auto px-4">
+                <div class="text-center">
+                    <div class="flex justify-center items-center mb-4">
+                        <i class="fa fa-tree text-primary text-2xl mr-2"></i>
+                        <h2 class="text-xl font-bold" data-i18n="title">我的树系统</h2>
+                    </div>
+                    <p class="text-gray-400 text-sm" data-i18n="copyright">© 2025 我的树系统 - 保留所有权利</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 语言包
+        const translations = {
+            'zh-CN': {
+                'title': '我的树系统',
+                'carousel1-title': '成长的见证',
+                'carousel1-desc': '这棵树见证了岁月的变迁，从幼苗成长为参天大树',
+                'carousel2-title': '四季的变化',
+                'carousel2-desc': '经历了春的萌芽、夏的繁茂、秋的落叶和冬的寂静',
+                'carousel3-title': '自然的馈赠',
+                'carousel3-desc': '为周围的环境带来生机与活力，是大自然的宝贵财富',
+                'about-title': '关于这棵树',
+                'planted-date-title': '种植日期',
+                'planted-date': '2008年',
+                'location-title': '位置信息',
+                'location': '中华人民共和国广东省中山市三乡镇东城花园E25-102单位',
+                'description-title': '树木描述',
+                'description': '这棵树自2008年种植以来，已经陪伴我们度过了17个春秋。它不仅美化了环境，还为我们提供了阴凉和新鲜空气。多年来，它见证了周围的变化，也成为了我们生活中不可或缺的一部分。',
+                'timeline-title': '成长历程',
+                'timeline-2008': '小树苗被精心种植，开始了它的生长旅程',
+                'timeline-2016': '树苗茁壮成长，枝繁叶茂，已经长到了可观的高度',
+                'timeline-2025': '成为了一棵参天大树，为周围环境带来生机与活力，已生长17年',
+                'copyright': '© 2025 我的树系统 - 保留所有权利'
+            },
+            'zh-TW': {
+                'title': '我的樹系統',
+                'carousel1-title': '成長的見證',
+                'carousel1-desc': '這棵樹見證了歲月的變遷，從幼苗成長為參天大樹',
+                'carousel2-title': '四季的變化',
+                'carousel2-desc': '經歷了春的萌芽、夏的繁茂、秋的落葉和冬的寂靜',
+                'carousel3-title': '自然的饋贈',
+                'carousel3-desc': '為周圍的環境帶來生機與活力，是大自然的寶貴財富',
+                'about-title': '關於這棵樹',
+                'planted-date-title': '種植日期',
+                'planted-date': '2008年',
+                'location-title': '位置信息',
+                'location': '中華人民共和國廣東省中山市三鄉鎮東城花園E25-102單位',
+                'description-title': '樹木描述',
+                'description': '這棵樹自2008年種植以來，已經陪伴我們度過了17個春秋。它不僅美化了環境，還為我們提供了陰涼和新鮮空氣。多年來，它見證了周圍的變化，也成為了我們生活中不可或缺的一部分。',
+                'timeline-title': '成長歷程',
+                'timeline-2008': '小樹苗被精心種植，開始了它的生長旅程',
+                'timeline-2016': '樹苗茁壯成長，枝繁葉茂，已經長到了可觀的高度',
+                'timeline-2025': '成為了一棵參天大樹，為周圍環境帶來生機與活力，已生長17年',
+                'copyright': '© 2025 我的樹系統 - 保留所有權利'
+            },
+            'en': {
+                'title': 'My Tree System',
+                'carousel1-title': 'Witness of Growth',
+                'carousel1-desc': 'This tree has witnessed the changes of time, growing from a seedling to a towering tree',
+                'carousel2-title': 'Seasons Change',
+                'carousel2-desc': 'Experienced the sprouting of spring, the lushness of summer, the falling leaves of autumn and the silence of winter',
+                'carousel3-title': 'Gift of Nature',
+                'carousel3-desc': 'Bringing vitality and energy to the surrounding environment, it is a precious asset of nature',
+                'about-title': 'About This Tree',
+                'planted-date-title': 'Planting Date',
+                'planted-date': 'Year 2008',
+                'location-title': 'Location Information',
+                'location': 'Unit E25-102, Dongcheng Garden, Sanxiang Town, Zhongshan City, Guangdong Province, People\'s Republic of China',
+                'description-title': 'Tree Description',
+                'description': 'Since this tree was planted in 2008, it has accompanied us for 17 years. It not only beautifies the environment, but also provides us with shade and fresh air. Over the years, it has witnessed changes around it and has become an indispensable part of our lives.',
+                'timeline-title': 'Growth Journey',
+                'timeline-2008': 'The small sapling was carefully planted, starting its growth journey',
+                'timeline-2016': 'The sapling thrived with luxuriant foliage, reaching a considerable height',
+                'timeline-2025': 'Became a towering tree, bringing vitality and energy to the surrounding environment, growing for 17 years',
+                'copyright': '© 2025 My Tree System - All Rights Reserved'
+            }
+        };
+        
+        // 当前语言
+        let currentLanguage = 'zh-CN';
+        
+        // 选择语言并进入主页面
+        function selectLanguage(lang) {
+            currentLanguage = lang;
+            updateLanguage();
+            
+            // 隐藏语言选择页面，显示主内容
+            document.getElementById('language-selection').classList.add('fade-out');
+            setTimeout(() => {
+                document.getElementById('language-selection').style.display = 'none';
+                document.getElementById('main-content').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('fade-in');
+                
+                // 初始化轮播
+                initCarousel();
+            }, 500);
+        }
+        
+        // 切换语言
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            updateLanguage();
+            
+            // 更新语言按钮样式
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-700');
+            });
+            
+            const activeBtn = Array.from(document.querySelectorAll('.language-btn')).find(
+                btn => (lang === 'zh-CN' && btn.textContent === '简') ||
+                       (lang === 'zh-TW' && btn.textContent === '繁') ||
+                       (lang === 'en' && btn.textContent === 'En')
+            );
+            
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                activeBtn.classList.add('bg-primary', 'text-white');
+            }
+        }
+        
+        // 更新页面语言
+        function updateLanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+        
+        // 初始化轮播
+        function initCarousel() {
+            const carouselItems = document.querySelectorAll('.carousel-item');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            let currentIndex = 0;
+            let interval;
+            
+            // 切换到指定索引的轮播项
+            function showSlide(index) {
+                // 隐藏所有轮播项
+                carouselItems.forEach(item => {
+                    item.classList.remove('active');
+                    item.classList.add('inactive');
+                });
+                
+                // 重置所有指示器
+                indicators.forEach(indicator => {
+                    indicator.classList.remove('opacity-100');
+                    indicator.classList.add('opacity-50');
+                });
+                
+                // 显示当前轮播项
+                carouselItems[index].classList.remove('inactive');
+                carouselItems[index].classList.add('active');
+                
+                // 激活当前指示器
+                indicators[index].classList.remove('opacity-50');
+                indicators[index].classList.add('opacity-100');
+                
+                currentIndex = index;
+            }
+            
+            // 下一张
+            function nextSlide() {
+                let newIndex = currentIndex + 1;
+                if (newIndex >= carouselItems.length) {
+                    newIndex = 0;
+                }
+                showSlide(newIndex);
+            }
+            
+            // 上一张
+            function prevSlide() {
+                let newIndex = currentIndex - 1;
+                if (newIndex < 0) {
+                    newIndex = carouselItems.length - 1;
+                }
+                showSlide(newIndex);
+            }
+            
+            // 自动轮播
+            function startInterval() {
+                interval = setInterval(nextSlide, 5000);
+            }
+            
+            // 停止自动轮播
+            function stopInterval() {
+                clearInterval(interval);
+            }
+            
+            // 事件监听
+            nextBtn.addEventListener('click', () => {
+                stopInterval();
+                nextSlide();
+                startInterval();
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                stopInterval();
+                prevSlide();
+                startInterval();
+            });
+            
+            // 指示器点击事件
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    stopInterval();
+                    showSlide(index);
+                    startInterval();
+                });
+            });
+            
+            // 鼠标悬停时停止轮播
+            document.getElementById('carousel').addEventListener('mouseenter', stopInterval);
+            document.getElementById('carousel').addEventListener('mouseleave', startInterval);
+            
+            // 开始自动轮播
+            startInterval();
+        }
+        
+        // 页面滚动时改变导航栏样式
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'shadow');
+                header.classList.remove('py-3', 'shadow-sm');
+            } else {
+                header.classList.add('py-3', 'shadow-sm');
+                header.classList.remove('py-2', 'shadow');
+            }
+        });
+    </script>
+</body>
+</html>
